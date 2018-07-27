@@ -298,7 +298,7 @@ class AES:
                 self.sub_bytes()
                 self.add_round_key()
                 print(f"Rounds\t\t {self.round_count - 1 - self.round} (decryption)")
-                print("CipherText\t", inttohex(self.plain, 0))
+                print("Plaintext\t", inttohex(self.plain, 0))
                 return strtolist(self.plain, 1)
 
 
@@ -309,8 +309,11 @@ class AES:
 # print("CipherText\t", aes16.decrypt())
 
 if __name__ == "__main__":
-    aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahahahahahaha')
+    test_plain = 'hahahahahahahaha'
+    test_key = 'hahahahahahahahahahahahahahahaha'
+    aes16 = AES(plain=test_plain, key=test_key)
+    print("plain\t", test_plain)
     cipher = aes16.encrypt()
-    print("cipher\t\t", cipher)
+    print(f"cipher\t\t{cipher}")
     plain = aes16.decrypt()
-    print("plain\t\t", plain)
+    print("plain\t", plain)
