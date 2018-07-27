@@ -12,12 +12,12 @@ def inttohex(data_in, mode=0):
     """
     data_out = []
     if mode == 0:
-        for i in range(len(data_in)):
-            data_out.append(format(data_in[i], '02x'))
+        for _ in range(len(data_in)):
+            data_out.append(format(data_in[_], '02x'))
         return data_out
     elif mode == 1:
-        for i in range(len(data_in)):
-            data_out.append(int(data_in[i], 16))
+        for _ in range(len(data_in)):
+            data_out.append(int(data_in[_], 16))
         return data_out
 
 
@@ -28,13 +28,13 @@ def strtolist(data_in, mode=0):
     """
     if mode == 0:
         data_out = []
-        for i in range(len(data_in)):
-            data_out.append(ord(data_in[i]))  # chr and ord functions for ascii conversions
+        for _ in range(len(data_in)):
+            data_out.append(ord(data_in[_]))  # chr and ord functions for ascii conversions
         return data_out
     elif mode == 1:
         data_out = ''
-        for i in range(16):
-            data_out += chr(data_in[i])
+        for _ in range(16):
+            data_out += chr(data_in[_])
         return data_out
 
 
@@ -63,13 +63,13 @@ def pad(str_in, mode=0, in_type=0):
     return str_in
 
 
-def generate_key(KL=16):
+def generate_key(key_len=16):
     """
     Generates random key in ascii format for a given key length [16, 24, or 32]
     """
     random_key = ''.join(random.SystemRandom().
                          choice(string.printable[:95])
-                         for i in range(KL))
+                         for _ in range(key_len))
     return random_key
 
 
@@ -86,9 +86,9 @@ def transpose(list_in):
       3,  7, 11, 15]
     """
     list_out = []
-    for i in range(4):
+    for _ in range(4):
         for j in range(4):
-            list_out.append(list_in[i + 4 * j])
+            list_out.append(list_in[_ + 4 * j])
     return list_out
 
 
@@ -100,10 +100,10 @@ def gf_mul(multiplicand, multiplier):
     product = 0
     a = multiplicand
     b = multiplier
-    while a * b:
+    while a * b > 0:
         if b % 2:
             product ^= a
-        if a > 128:
+        if a >= 128:
             a = (a << 1) ^ 283
         else:
             a <<= 1
@@ -116,8 +116,8 @@ def listxor(list1, list2):
     returns list1 elements (xor) list2 elements
     """
     list3 = []
-    for i in range(len(list1)):
-        list3.append(list1[i] ^ list2[i])
+    for _ in range(len(list1)):
+        list3.append(list1[_] ^ list2[_])
     return list3
 
 
@@ -190,41 +190,56 @@ class AES:
         self.round_keys = [0]
         self.key_schedule()
 
-    def key_expansion_core(self, key_seg, index):
-        key_seg = key_seg[1:] + key_seg[:1]
-        for i in range(len(key_seg)):
-            key_seg[i] = self.sbox_e[key_seg[i]]
-        key_seg[0] = key_seg[0] ^ self.rcon[index]
+    def key_expansion_core(self, key_seg, index, exp_mode):
+        if exp_mode == 0:
+            key_seg = key_seg[1:] + key_seg[:1]
+        for _ in range(len(key_seg)):
+            key_seg[_] = self.sbox_e[key_seg[_]]
+        if exp_mode == 0:
+            key_seg[0] = key_seg[0] ^ self.rcon[index]
         return key_seg
 
     def key_schedule(self):
         round_keys = []
         key_len = len(self.key)
-        for i in range(len(self.key)):
-            round_keys.append(self.key[i])
+        for _ in range(len(self.key)):
+            round_keys.append(self.key[_])
         round_index = 1
-
         while len(round_keys) <= self.byte_count:
+            # print("while1")
             i = 0
+            round_index2 = 0
             while i < key_len:
-                if i == 0:
+                # print("while2")
+                if i == 0 or (i == 16 and key_len == 32):
+                    exp_mode = int(i/16)
                     temp = round_keys[-4:]
-                    #print("copy previous word", inttohex(temp))
-                    temp = self.key_expansion_core(temp, round_index)
-                    #print("after expansion core", inttohex(temp))
-                    word_index = (round_index - 1) * key_len
+                    # print("copy previous word", inttohex(temp))
+                    temp = self.key_expansion_core(temp, round_index, exp_mode)
+                    # print("after expansion core", inttohex(temp))
+                    word_index = ((round_index - 1) * key_len) + round_index2
                     round_keys.extend(listxor(temp, round_keys[word_index: word_index + 4]))
                     i += 4
-                    #print("word appended to list" ,inttohex(round_keys[-4:]))
+                    # print("sbox byte", 'i', i, word_index, word_index + 4)
+                    # print("word appended to list" ,inttohex(round_keys[-4:]))
                 else:
-                    for j in range(1, int(key_len/4)):
+                    if key_len == 32:
+                        intermediate_steps = 4
+                    else:
+                        intermediate_steps = int(key_len/4)
+                    for j in range(1, intermediate_steps):
                         temp = round_keys[-4:]
-                        #print("copy previous word", inttohex(temp))
-                        word_index = (round_index - 1) * key_len
+                        # print("copy previous word", inttohex(temp))
+                        word_index = ((round_index - 1) * key_len) + round_index2
                         round_keys.extend(listxor(temp, round_keys[word_index + 4*j: word_index + 4*(j+1)]))
                         i += 4
-                        #print("word appended to list", inttohex(round_keys[-4:]))
+                        # print("rest byte", 'i', i, word_index + 4 * j, word_index + 4 * (j + 1))
+                        # print("word appended to list", inttohex(round_keys[-4:]))
+                if key_len == 32 and i >= 15:
+                    round_index2 = 16
+                # print("while2 ends")
             round_index += 1
+            # print("while1 ends")
         self.round_keys = round_keys[:self.byte_count]
 
     def add_round_key(self):
@@ -235,7 +250,7 @@ class AES:
     def sub_bytes(self):
         for i in range(16):
             self.plain[i] = self.sbox_e[self.plain[i]]
-        #print("SubBytes\t", inttohex(self.plain.copy(), 0))
+        # print("SubBytes\t", inttohex(self.plain.copy(), 0))
 
     def shift_rows(self):
         self.plain = transpose(self.plain)
@@ -243,7 +258,7 @@ class AES:
         self.plain[8:12] = self.plain[10:12] + self.plain[8:10]
         self.plain[-4:] = self.plain[-1:] + self.plain[-4:-1]
         self.plain = transpose(self.plain)
-        #print("ShiftRows\t", inttohex(self.plain.copy(), 0))
+        # print("ShiftRows\t", inttohex(self.plain.copy(), 0))
 
     def mix_columns(self):
         temp_state = [0]*16
@@ -253,10 +268,10 @@ class AES:
                 temp_plain = self.plain[l]
                 temp_mix = self.mix_e[k]
                 temp_state[i] = temp_state[i] ^ gf_mul(temp_plain, temp_mix)
-            #print(f"tuple", f"temp_state[{i}]=", hex(temp_state[i]))
+            # print(f"tuple", f"temp_state[{i}]=", hex(temp_state[i]))
 
         self.plain = transpose(temp_state)
-        #print("MixColumns\t", inttohex(transpose(temp_state), 0))
+        # rint("MixColumns\t", inttohex(transpose(temp_state), 0))
 
     def encrypt(self):
         self.round = 0
@@ -282,21 +297,24 @@ class AES:
         return "AES Decrypt Function"
 
 
-#for encryption
+# #for encryption
 
-aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahaha')
-#aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahaha')
-#aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahahahahahaha')
-#aes16 = AES(plain='Two One Nine Two', key='Thats my Kung Fu')
+# aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahaha')
+aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahaha')
+# aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahahahahahaha')
+# aes16 = AES(plain='Two One Nine Two', key='Thats my Kung Fu')
+
 print("PlainText\t", strtolist(aes16.plain, 1))
 print("PlainText\t", inttohex(aes16.plain, 0))
 print("CipherText\t", aes16.encrypt())
 
 # #for round keys
-#
-# aes16 = AES(plain='Two One Nine Two', key='Thats my Kung Fu')
-# for i in range(aes16.round_count):
-#     print(f"round{format(i,'02d')}",  inttohex(aes16.round_keys[i*16: (i+1)*16]))
+
+# #aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
+# #aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
+# aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
+# for _ in range(aes16.round_count):
+#     print(f"round{format(_,'02d')}",  inttohex(aes16.round_keys[_*16: (_+1)*16]))
 
 
 if __name__ == "__main__":
