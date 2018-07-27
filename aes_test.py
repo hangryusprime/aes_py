@@ -4,7 +4,7 @@ Test module for aespy.py
 import time
 from test import test
 from tqdm import tqdm
-from aespy import AES
+from aes import AES
 
 
 def aespy_test(nIter=10**5):
