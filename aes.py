@@ -122,7 +122,7 @@ def listxor(list1, list2):
 
 
 class AES:
-    sbox_e = [ 99, 124, 119, 123, 242, 107, 111, 197,  48,   1, 103,  43, 254, 215, 171, 118,
+    sbox =  [[ 99, 124, 119, 123, 242, 107, 111, 197,  48,   1, 103,  43, 254, 215, 171, 118,
               202, 130, 201, 125, 250,  89,  71, 240, 173, 212, 162, 175, 156, 164, 114, 192,
               183, 253, 147,  38,  54,  63, 247, 204,  52, 165, 229, 241, 113, 216,  49,  21,
                 4, 199,  35, 195,  24, 150,   5, 154,   7,  18, 128, 226, 235,  39, 178, 117,
@@ -137,8 +137,8 @@ class AES:
               186, 120,  37,  46,  28, 166, 180, 198, 232, 221, 116,  31,  75, 189, 139, 138,
               112,  62, 181, 102,  72,   3, 246,  14,  97,  53,  87, 185, 134, 193,  29, 158,
               225, 248, 152,  17, 105, 217, 142, 148, 155,  30, 135, 233, 206,  85,  40, 223,
-              140, 161, 137,  13, 191, 230,  66, 104,  65, 153,  45,  15, 176,  84, 187,  22]
-    sbox_d = [ 82,   9, 106, 213,  48,  54, 165,  56, 191,  64, 163, 158, 129, 243, 215, 251,
+              140, 161, 137,  13, 191, 230,  66, 104,  65, 153,  45,  15, 176,  84, 187,  22],
+             [ 82,   9, 106, 213,  48,  54, 165,  56, 191,  64, 163, 158, 129, 243, 215, 251,
               124, 227,  57, 130, 155,  47, 255, 135,  52, 142,  67,  68, 196, 222, 233, 203,
                84, 123, 148,  50, 166, 194,  35,  61, 238,  76, 149,  11,  66, 250, 195,  78,
                 8,  46, 161, 102,  40, 217,  36, 178, 118,  91, 162,  73, 109, 139, 209,  37,
@@ -153,18 +153,18 @@ class AES:
                31, 221, 168,  51, 136,   7, 199,  49, 177,  18,  16,  89,  39, 128, 236,  95,
                96,  81, 127, 169,  25, 181,  74,  13,  45, 229, 122, 159, 147, 201, 156, 239,
               160, 224,  59,  77, 174,  42, 245, 176, 200, 235, 187,  60, 131,  83, 153,  97,
-               23,  43,   4, 126, 186, 119, 214,  38, 225, 105,  20,  99,  85,  33,  12, 125]
-    rcon  = [0, 1, 2, 4, 8, 16, 32, 64, 128, 27, 54, 108, 216, 171, 77, 154]
-    mix_e = [ 2,  3,  1,  1,  1,  2,  3,  1,  1,  1,  2,  3,  3,  1,  1,  2]
-    mix_d = [14, 11, 13,  9,  9, 14, 11, 13, 13,  9, 14, 11, 11, 13,  9, 14]
-    mtrx_conn = [[( 0,  0), ( 1,  4), ( 2,  8), ( 3, 12)], [( 0,  1), ( 1,  5), ( 2,  9), ( 3, 13)],
-                 [( 0,  2), ( 1,  6), ( 2, 10), ( 3, 14)], [( 0,  3), ( 1,  7), ( 2, 11), ( 3, 15)],
-                 [( 4,  0), ( 5,  4), ( 6,  8), ( 7, 12)], [( 4,  1), ( 5,  5), ( 6,  9), ( 7, 13)],
-                 [( 4,  2), ( 5,  6), ( 6, 10), ( 7, 14)], [( 4,  3), ( 5,  7), ( 6, 11), ( 7, 15)],
-                 [( 8,  0), ( 9,  4), (10,  8), (11, 12)], [( 8,  1), ( 9,  5), (10,  9), (11, 13)],
-                 [( 8,  2), ( 9,  6), (10, 10), (11, 14)], [( 8,  3), ( 9,  7), (10, 11), (11, 15)],
-                 [(12,  0), (13,  4), (14,  8), (15, 12)], [(12,  1), (13,  5), (14,  9), (15, 13)],
-                 [(12,  2), (13,  6), (14, 10), (15, 14)], [(12,  3), (13,  7), (14, 11), (15, 15)]]
+               23,  43,   4, 126, 186, 119, 214,  38, 225, 105,  20,  99,  85,  33,  12, 125]]
+    rcon = [0, 1, 2, 4, 8, 16, 32, 64, 128, 27, 54, 108, 216, 171, 77, 154]
+    mix_constant = [[ 2,  3,  1,  1,  1,  2,  3,  1,  1,  1,  2,  3,  3,  1,  1,  2],
+                    [14, 11, 13,  9,  9, 14, 11, 13, 13,  9, 14, 11, 11, 13,  9, 14]]
+    matrix_pairs = [[( 0,  0), ( 1,  4), ( 2,  8), ( 3, 12)], [( 0,  1), ( 1,  5), ( 2,  9), ( 3, 13)],
+                    [( 0,  2), ( 1,  6), ( 2, 10), ( 3, 14)], [( 0,  3), ( 1,  7), ( 2, 11), ( 3, 15)],
+                    [( 4,  0), ( 5,  4), ( 6,  8), ( 7, 12)], [( 4,  1), ( 5,  5), ( 6,  9), ( 7, 13)],
+                    [( 4,  2), ( 5,  6), ( 6, 10), ( 7, 14)], [( 4,  3), ( 5,  7), ( 6, 11), ( 7, 15)],
+                    [( 8,  0), ( 9,  4), (10,  8), (11, 12)], [( 8,  1), ( 9,  5), (10,  9), (11, 13)],
+                    [( 8,  2), ( 9,  6), (10, 10), (11, 14)], [( 8,  3), ( 9,  7), (10, 11), (11, 15)],
+                    [(12,  0), (13,  4), (14,  8), (15, 12)], [(12,  1), (13,  5), (14,  9), (15, 13)],
+                    [(12,  2), (13,  6), (14, 10), (15, 14)], [(12,  3), (13,  7), (14, 11), (15, 15)]]
 
     def __init__(self, plain, key=None):
         plain = pad(plain, 0, 0)
@@ -180,6 +180,7 @@ class AES:
         self.key = strtolist(key, 0)
         self.plain = strtolist(plain, 0)
         self.round = 0
+        self.mode = 0
         if len(self.key) == 16:
             self.round_count = 11
         elif len(self.key) == 24:
@@ -193,8 +194,8 @@ class AES:
     def key_expansion_core(self, key_seg, index, exp_mode):
         if exp_mode == 0:
             key_seg = key_seg[1:] + key_seg[:1]
-        for _ in range(len(key_seg)):
-            key_seg[_] = self.sbox_e[key_seg[_]]
+        for i in range(len(key_seg)):
+            key_seg[i] = self.sbox[self.mode][key_seg[i]]
         if exp_mode == 0:
             key_seg[0] = key_seg[0] ^ self.rcon[index]
         return key_seg
@@ -206,22 +207,16 @@ class AES:
             round_keys.append(self.key[_])
         round_index = 1
         while len(round_keys) <= self.byte_count:
-            # print("while1")
             i = 0
             round_index2 = 0
             while i < key_len:
-                # print("while2")
                 if i == 0 or (i == 16 and key_len == 32):
                     exp_mode = int(i/16)
                     temp = round_keys[-4:]
-                    # print("copy previous word", inttohex(temp))
                     temp = self.key_expansion_core(temp, round_index, exp_mode)
-                    # print("after expansion core", inttohex(temp))
                     word_index = ((round_index - 1) * key_len) + round_index2
                     round_keys.extend(listxor(temp, round_keys[word_index: word_index + 4]))
                     i += 4
-                    # print("sbox byte", 'i', i, word_index, word_index + 4)
-                    # print("word appended to list" ,inttohex(round_keys[-4:]))
                 else:
                     if key_len == 32:
                         intermediate_steps = 4
@@ -229,95 +224,96 @@ class AES:
                         intermediate_steps = int(key_len/4)
                     for j in range(1, intermediate_steps):
                         temp = round_keys[-4:]
-                        # print("copy previous word", inttohex(temp))
                         word_index = ((round_index - 1) * key_len) + round_index2
                         round_keys.extend(listxor(temp, round_keys[word_index + 4*j: word_index + 4*(j+1)]))
                         i += 4
-                        # print("rest byte", 'i', i, word_index + 4 * j, word_index + 4 * (j + 1))
-                        # print("word appended to list", inttohex(round_keys[-4:]))
                 if key_len == 32 and i >= 15:
                     round_index2 = 16
-                # print("while2 ends")
             round_index += 1
-            # print("while1 ends")
         self.round_keys = round_keys[:self.byte_count]
 
     def add_round_key(self):
         self.plain = listxor(self.plain, self.round_keys[self.round*16: (self.round+1)*16])
-        # print(f"RoundKey[{format(self.round,'02d')}]\t", inttohex(self.round_keys[self.round*16: (self.round+1)*16], 0))
-        # print(f"AddRoundKey[{self.round}]\t", inttohex(self.plain.copy(), 0))
 
     def sub_bytes(self):
+        sbox_used = self.sbox[self.mode]
         for i in range(16):
-            self.plain[i] = self.sbox_e[self.plain[i]]
-        # print("SubBytes\t", inttohex(self.plain.copy(), 0))
+            self.plain[i] = sbox_used[self.plain[i]]
 
     def shift_rows(self):
         self.plain = transpose(self.plain)
-        self.plain[4:8] = self.plain[5:8] + self.plain[4:5]
+        inv_index = self.mode * 2
+        self.plain[4:8] = self.plain[5 + inv_index:8] + self.plain[4:5 + inv_index]
         self.plain[8:12] = self.plain[10:12] + self.plain[8:10]
-        self.plain[-4:] = self.plain[-1:] + self.plain[-4:-1]
+        self.plain[-4:] = self.plain[15 - inv_index:] + self.plain[12:15 - inv_index]
         self.plain = transpose(self.plain)
-        # print("ShiftRows\t", inttohex(self.plain.copy(), 0))
 
     def mix_columns(self):
         temp_state = [0]*16
         self.plain = transpose(self.plain)
         for i in range(16):
-            for (k, l) in self.mtrx_conn[i]:
+            for (k, l) in self.matrix_pairs[i]:
                 temp_plain = self.plain[l]
-                temp_mix = self.mix_e[k]
+                temp_mix = self.mix_constant[self.mode][k]
                 temp_state[i] = temp_state[i] ^ gf_mul(temp_plain, temp_mix)
-            # print(f"tuple", f"temp_state[{i}]=", hex(temp_state[i]))
 
         self.plain = transpose(temp_state)
-        # rint("MixColumns\t", inttohex(transpose(temp_state), 0))
 
     def encrypt(self):
+        self.mode = 0
         self.round = 0
-        for r in range(self.round_count):
+        for r in range(0, self.round_count, 1):
             if r == 0:
                 self.add_round_key()
-                self.round = r + 1
+                self.round += 1
             elif r != self.round_count-1:
                 self.sub_bytes()
                 self.shift_rows()
                 self.mix_columns()
                 self.add_round_key()
-                self.round = r + 1
+                self.round += 1
             else:
                 self.sub_bytes()
                 self.shift_rows()
                 self.add_round_key()
-                print(f"{self.round} Rounds of encryption")
+                print(f"Rounds\t\t {self.round} (encryption)")
                 print("CipherText\t", inttohex(self.plain, 0))
                 return strtolist(self.plain, 1)
 
     def decrypt(self):
-        return "AES Decrypt Function"
+        self.mode = 1
+        self.round = self.round_count-1
+        for r in range(self.round_count - 1, -1, - 1):
+            if r == self.round_count-1:
+                self.add_round_key()
+                self.round -= 1
+            elif self.round != 0:
+                self.shift_rows()
+                self.sub_bytes()
+                self.add_round_key()
+                self.mix_columns()
+                self.round -= 1
+            else:
+                self.shift_rows()
+                self.sub_bytes()
+                self.add_round_key()
+                print(f"Rounds\t\t {self.round_count - 1 - self.round} (decryption)")
+                print("Plaintext\t", inttohex(self.plain, 0))
+                return strtolist(self.plain, 1)
 
 
-# #for encryption
-
-# aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahaha')
-aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahaha')
 # aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahahahahahaha')
-# aes16 = AES(plain='Two One Nine Two', key='Thats my Kung Fu')
-
-print("PlainText\t", strtolist(aes16.plain, 1))
-print("PlainText\t", inttohex(aes16.plain, 0))
-print("CipherText\t", aes16.encrypt())
-
-# #for round keys
-
-# #aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
-# #aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
-# aes16 = AES(plain='hahahahahahahaha', key='ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ')
-# for _ in range(aes16.round_count):
-#     print(f"round{format(_,'02d')}",  inttohex(aes16.round_keys[_*16: (_+1)*16]))
-
+#
+# print("PlainText\t", strtolist(aes16.plain, 1))
+# print("PlainText\t", inttohex(aes16.plain, 0))
+# print("CipherText\t", aes16.decrypt())
 
 if __name__ == "__main__":
-    aes16 = AES(plain='Two One Nine Two', key='Thats my Kung Fu')
+    test_plain = 'hahahahahahahaha'
+    test_key = 'hahahahahahahahahahahahahahahaha'
+    aes16 = AES(plain=test_plain, key=test_key)
+    print("plain\t", test_plain)
     cipher = aes16.encrypt()
-    print(cipher)
+    print(f"cipher\t\t{cipher}")
+    plain = aes16.decrypt()
+    print("plain\t", plain)
