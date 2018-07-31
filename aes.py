@@ -1,127 +1,11 @@
 """
 AES implementation in Python 3
 """
-import random
-import string
-
-
-def inttohex(data_in, mode=0):
-    """
-    converts list elements from int to hex and back
-    mode : int to hex (0) , hex to int (1)
-    """
-    data_out = []
-    if mode == 0:
-        for _ in range(len(data_in)):
-            data_out.append(format(data_in[_], '02x'))
-        return data_out
-    elif mode == 1:
-        for _ in range(len(data_in)):
-            data_out.append(int(data_in[_], 16))
-        return data_out
-
-
-def strtolist(data_in, mode=0):
-    """
-    mode 0: splits an ascii string and adds elements to a list.
-    mode 1: converts list elements to ascii characters and joins them.
-    """
-    if mode == 0:
-        data_out = []
-        for _ in range(len(data_in)):
-            data_out.append(ord(data_in[_]))  # chr and ord functions for ascii conversions
-        return data_out
-    elif mode == 1:
-        data_out = ''
-        for _ in range(16):
-            data_out += chr(data_in[_])
-        return data_out
-
-
-def pad(str_in, mode=0, in_type=0):
-    """
-    mode : pad (0) , unpad (1)
-    in_type: plaintext (0) , key (1)
-    """
-    sl = len(str_in)
-    if mode == 0:
-        if in_type == 0:
-            if sl < 16:
-                num = 16 - (sl % 16)
-                str_in += chr(num) * num  # adds padding elements at the end of the string
-        elif in_type == 1:
-            if sl not in [16, 24, 32]:
-                if sl < 16:
-                    str_in += '0' * (16 - sl)
-                elif sl < 24:
-                    str_in += '0' * (24 - sl)
-                elif sl < 32:
-                    str_in += '0' * (32 - sl)
-    elif mode == 1:
-        if in_type == 0:
-            str_in = str_in[0:-ord(str_in[-1])]  # removes the padding elements at the end of the string
-    return str_in
-
-
-def generate_key(key_len=16):
-    """
-    Generates random key in ascii format for a given key length [16, 24, or 32]
-    """
-    random_key = ''.join(random.SystemRandom().
-                         choice(string.printable[:95])
-                         for _ in range(key_len))
-    return random_key
-
-
-def transpose(list_in):
-    """
-    Shuffle/transpose a given 16 element list from
-    [ 0,  1,  2,  3,
-      4,  5,  6,  7,
-      8,  9, 10, 11,
-     12, 13, 14, 15] to
-    [ 0,  4,  8, 12,
-      1,  5,  9, 13,
-      2,  6, 10, 14,
-      3,  7, 11, 15]
-    """
-    list_out = []
-    for _ in range(4):
-        for j in range(4):
-            list_out.append(list_in[_ + 4 * j])
-    return list_out
-
-
-def gf_mul(multiplicand, multiplier):
-    """
-    Galois Field multiplication function for AES using irreducible polynomial
-    x^8 + x^4 + x^3 + x^1 + 1
-    """
-    product = 0
-    a = multiplicand
-    b = multiplier
-    while a * b > 0:
-        if b % 2:
-            product ^= a
-        if a >= 128:
-            a = (a << 1) ^ 283
-        else:
-            a <<= 1
-        b >>= 1
-    return product
-
-
-def listxor(list1, list2):
-    """
-    returns list1 elements (xor) list2 elements
-    """
-    list3 = []
-    for _ in range(len(list1)):
-        list3.append(list1[_] ^ list2[_])
-    return list3
+from __init__ import *
 
 
 class AES:
+    start_time = time.time()
     sbox =  [[ 99, 124, 119, 123, 242, 107, 111, 197,  48,   1, 103,  43, 254, 215, 171, 118,
               202, 130, 201, 125, 250,  89,  71, 240, 173, 212, 162, 175, 156, 164, 114, 192,
               183, 253, 147,  38,  54,  63, 247, 204,  52, 165, 229, 241, 113, 216,  49,  21,
@@ -177,8 +61,8 @@ class AES:
             key = pad(key, 0, 1)
         else:
             key = pad(key, 0, 1)
-        self.key = strtolist(key, 0)
-        self.plain = strtolist(plain, 0)
+        self.key = str_list(key, 0)
+        self.plain = str_list(plain, 0)
         self.round = 0
         self.mode = 0
         if len(self.key) == 16:
@@ -203,8 +87,8 @@ class AES:
     def key_schedule(self):
         round_keys = []
         key_len = len(self.key)
-        for _ in range(len(self.key)):
-            round_keys.append(self.key[_])
+        for i in range(len(self.key)):
+            round_keys.append(self.key[i])
         round_index = 1
         while len(round_keys) <= self.byte_count:
             i = 0
@@ -215,7 +99,7 @@ class AES:
                     temp = round_keys[-4:]
                     temp = self.key_expansion_core(temp, round_index, exp_mode)
                     word_index = ((round_index - 1) * key_len) + round_index2
-                    round_keys.extend(listxor(temp, round_keys[word_index: word_index + 4]))
+                    round_keys.extend(list_xor(temp, round_keys[word_index: word_index + 4]))
                     i += 4
                 else:
                     if key_len == 32:
@@ -225,7 +109,7 @@ class AES:
                     for j in range(1, intermediate_steps):
                         temp = round_keys[-4:]
                         word_index = ((round_index - 1) * key_len) + round_index2
-                        round_keys.extend(listxor(temp, round_keys[word_index + 4*j: word_index + 4*(j+1)]))
+                        round_keys.extend(list_xor(temp, round_keys[word_index + 4*j: word_index + 4*(j+1)]))
                         i += 4
                 if key_len == 32 and i >= 15:
                     round_index2 = 16
@@ -233,7 +117,7 @@ class AES:
         self.round_keys = round_keys[:self.byte_count]
 
     def add_round_key(self):
-        self.plain = listxor(self.plain, self.round_keys[self.round*16: (self.round+1)*16])
+        self.plain = list_xor(self.plain, self.round_keys[self.round*16: (self.round+1)*16])
 
     def sub_bytes(self):
         sbox_used = self.sbox[self.mode]
@@ -277,8 +161,10 @@ class AES:
                 self.shift_rows()
                 self.add_round_key()
                 print(f"Rounds\t\t {self.round} (encryption)")
-                print("CipherText\t", inttohex(self.plain, 0))
-                return strtolist(self.plain, 1)
+                time_exec = time.time() - self.start_time
+                print(f"Time(ms)\t {time_exec*1000}")
+                print(f"Cipher(h)\t {int_hex(self.plain, 0)}")
+                return str_list(self.plain, 1)
 
     def decrypt(self):
         self.mode = 1
@@ -298,22 +184,19 @@ class AES:
                 self.sub_bytes()
                 self.add_round_key()
                 print(f"Rounds\t\t {self.round_count - 1 - self.round} (decryption)")
-                print("Plaintext\t", inttohex(self.plain, 0))
-                return strtolist(self.plain, 1)
+                time_exec = time.time() - self.start_time
+                print(f"Time(ms)\t {time_exec*1000}")
+                print(f"Plain(h)\t {int_hex(self.plain, 0)}")
+                return str_list(self.plain, 1)
 
-
-# aes16 = AES(plain='hahahahahahahaha', key='hahahahahahahahahahahahahahahaha')
-#
-# print("PlainText\t", strtolist(aes16.plain, 1))
-# print("PlainText\t", inttohex(aes16.plain, 0))
-# print("CipherText\t", aes16.decrypt())
 
 if __name__ == "__main__":
     test_plain = 'hahahahahahahaha'
     test_key = 'hahahahahahahahahahahahahahahaha'
     aes16 = AES(plain=test_plain, key=test_key)
-    print("plain\t", test_plain)
+    print(f"plain(a)\t {test_plain}")
     cipher = aes16.encrypt()
-    print(f"cipher\t\t{cipher}")
+    print(f"cipher(a)\t {repr(cipher)}")
+    aes16 = AES(plain=cipher, key=test_key)
     plain = aes16.decrypt()
-    print("plain\t", plain)
+    print(f"plain(a)\t {plain}")
