@@ -49,3 +49,6 @@ nosetests.xml
 
 # virtual env
 venv/
+
+# VS Code
+.code-workspace
