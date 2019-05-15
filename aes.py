@@ -148,8 +148,8 @@ class AES:
 
 
 if __name__ == "__main__":
-    test_plain = 'hahahahahahahaha'
-    test_key = 'hahahahahahahahahahahahahahahaha'
+    test_plain = 'sixteencharacter'
+    test_key = 'thirtytwocharactercipherkey12345'
     print(f"plain(a)\t {test_plain}")
     aes16 = AES(plain=test_plain, key=test_key)
     cipher = aes16.encrypt()
